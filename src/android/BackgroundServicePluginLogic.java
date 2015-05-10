@@ -341,76 +341,41 @@ public class BackgroundServicePluginLogic {
 			return result;
 		}
 		
-		
-
-		/*
-		 * Background Service specific methods
-		 */
-		public void close()
-		{
-			Log.d("ServiceDetails", "Close called");
+		public void close() {
 			try {
-				// Remove the lister to this publisher
 				this.deregisterListener();
-				
-				Log.d("ServiceDetails", "Removing ServiceListener");
 				mApi.removeListener(serviceListener);
-				Log.d("ServiceDetails", "Removing ServiceConnection");
 				this.mContext.unbindService(serviceConnection);
 			} catch (Exception ex) {
-				// catch any issues, typical for destroy routines
-				// even if we failed to destroy something, we need to continue destroying
 				Log.d(LOCALTAG, "close failed", ex);
 				Log.d(LOCALTAG, "Ignoring exception - will continue");
 			}
-			Log.d("ServiceDetails", "Close finished");
 		}
-
+		
 		private boolean deregisterListener() {
 			boolean result = false;
-
 			if (this.isRegisteredForUpdates()) {
-				Log.d("ServiceDetails", "Listener deregistering");
 				try {
-					Log.d("ServiceDetails", "Listener closing");
 					this.mListener.closeListener(new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG)), this.mListenerExtras);
-					Log.d("ServiceDetails", "Listener closed");
 				} catch (Exception ex) {
 					Log.d("ServiceDetails", "Error occurred while closing the listener", ex);
 				}
 				
 				this.mListener = null;
 				this.mListenerExtras = null;
-				Log.d("ServiceDetails", "Listener deregistered");
-				
 				result = true;
 			}
 			
 			return result;
 		}
-
-		/*
-		 ************************************************************************************************
-		 * Private Methods 
-		 ************************************************************************************************
-		 */
+		
 		private boolean bindToService() {
 			boolean result = false;
-			
-			Log.d(LOCALTAG, "Starting bindToService");
-			
 			try {
-				// Fix to https://github.com/Red-Folder/bgs-core/issues/18
-				// Gets the class from string
 				Class<?> serviceClass = ReflectionHelper.LoadClass(this.mServiceName);
 				this.mService = new Intent(this.mContext, serviceClass);
-
-				Log.d(LOCALTAG, "Attempting to start service");
 				this.mContext.startService(this.mService);
-
-				Log.d(LOCALTAG, "Attempting to bind to service");
 				if (this.mContext.bindService(this.mService, serviceConnection, 0)) {
-					Log.d(LOCALTAG, "Waiting for service connected lock");
 					synchronized(mServiceConnectedLock) {
 						while (mServiceConnected==null) {
 							try {
@@ -419,22 +384,20 @@ public class BackgroundServicePluginLogic {
 								Log.d(LOCALTAG, "Interrupt occurred while waiting for connection", e);
 							}
 						}
+						
 						result = this.mServiceConnected;
 					}
 				}
 			} catch (Exception ex) {
 				Log.d(LOCALTAG, "bindToService failed", ex);
 			}
-
-			Log.d(LOCALTAG, "Finished bindToService");
-
+			
 			return result;
 		}
 		
 		private ServiceConnection serviceConnection = new ServiceConnection() {
 			@Override
 			public void onServiceConnected(ComponentName name, IBinder service) {
-				// that's how we get the client side of the IPC connection
 				mApi = BackgroundServiceApi.Stub.asInterface(service);
 				try {
 					mApi.addListener(serviceListener);
@@ -444,44 +407,36 @@ public class BackgroundServicePluginLogic {
 				
 				synchronized(mServiceConnectedLock) {
 					mServiceConnected = true;
-
 					mServiceConnectedLock.notify();
 				}
-
 			}
-
+			
 			@Override
 			public void onServiceDisconnected(ComponentName name) {
 				synchronized(mServiceConnectedLock) {
 					mServiceConnected = false;
-
 					mServiceConnectedLock.notify();
 				}
 			}
 		};
-
+		
 		private BackgroundServiceListener.Stub serviceListener = new BackgroundServiceListener.Stub() {
 			@Override
 			public void handleUpdate() throws RemoteException {
 				handleLatestResult();
 			}
-
+			
 			@Override
 			public String getUniqueID() throws RemoteException {
 				return mUniqueID;
 			}
 		};
-
+		
 		private void handleLatestResult() {
-			Log.d("ServiceDetails", "Latest results received");
-			
 			if (this.isRegisteredForUpdates()) {
-				Log.d("ServiceDetails", "Calling listener");
-				
 				ExecuteResult result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG), false);
 				try {
 					this.mListener.handleUpdate(result, this.mListenerExtras);
-					Log.d("ServiceDetails", "Listener finished");
 				} catch (Exception ex) {
 					Log.d("ServiceDetails", "Listener failed", ex);
 					Log.d("ServiceDetails", "Disabling listener");
@@ -492,11 +447,9 @@ public class BackgroundServicePluginLogic {
 				Log.d("ServiceDetails", "No action performed");
 			}
 		}
-
+		
 		private JSONObject createJSONResult(Boolean success, int errorCode, String errorMessage) {
 			JSONObject result = new JSONObject();
-
-			// Append the basic information
 			try {
 				result.put("Success", success);
 				result.put("ErrorCode", errorCode);
@@ -504,7 +457,7 @@ public class BackgroundServicePluginLogic {
 			} catch (JSONException e) {
 				Log.d(LOCALTAG, "Adding basic info to JSONObject failed", e);
 			}
-
+			
 			if (this.mServiceConnected != null && this.mServiceConnected && this.isServiceRunning()) {
 				try { result.put("ServiceRunning", true); } catch (Exception ex) {Log.d(LOCALTAG, "Adding ServiceRunning to JSONObject failed", ex);};
 				try { result.put("TimerEnabled", isTimerEnabled()); } catch (Exception ex) {Log.d(LOCALTAG, "Adding TimerEnabled to JSONObject failed", ex);};
@@ -518,12 +471,13 @@ public class BackgroundServicePluginLogic {
 				try { result.put("LatestResult", null); } catch (Exception ex) {Log.d(LOCALTAG, "Adding LatestResult to JSONObject failed", ex);};
 				try { result.put("TimerMilliseconds", null); } catch (Exception ex) {Log.d(LOCALTAG, "Adding TimerMilliseconds to JSONObject failed", ex);};
 			}
-
+			
 			try { result.put("RegisteredForBootStart", isRegisteredForBootStart()); } catch (Exception ex) {Log.d(LOCALTAG, "Adding RegisteredForBootStart to JSONObject failed", ex);};
 			try { result.put("RegisteredForUpdates", isRegisteredForUpdates()); } catch (Exception ex) {Log.d(LOCALTAG, "Adding RegisteredForUpdates to JSONObject failed", ex);};
-				
 			return result;
 		}
+		
+		
 		
 		private boolean isServiceRunning()
 		{
