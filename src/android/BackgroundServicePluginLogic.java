@@ -321,18 +321,18 @@ public class BackgroundServicePluginLogic {
 			return result;
 		}
 		
-		public ExecuteResult deregisterForUpdates()
-		{
+		public ExecuteResult deregisterForUpdates() {
 			ExecuteResult result = null;
 			try {
-				if (this.isRegisteredForUpdates())
-					if (this.deregisterListener())
+				if (this.isRegisteredForUpdates()) {
+					if (this.deregisterListener()) {
 						result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG));
-					else
+					} else {
 						result = new ExecuteResult(ExecuteStatus.ERROR, createJSONResult(false, ERROR_UNABLE_TO_CLOSED_LISTENER_CODE, ERROR_UNABLE_TO_CLOSED_LISTENER_MSG));
-				else
+					}
+				} else {
 					result = new ExecuteResult(ExecuteStatus.INVALID_ACTION, createJSONResult(false, ERROR_LISTENER_NOT_REGISTERED_CODE, ERROR_LISTENER_NOT_REGISTERED_MSG));
-				
+				}
 			} catch (Exception ex) {
 				Log.d(LOCALTAG, "deregsiterForUpdates failed", ex);
 				result = new ExecuteResult(ExecuteStatus.ERROR, createJSONResult(false, ERROR_EXCEPTION_CODE, ex.getMessage()));
@@ -340,6 +340,8 @@ public class BackgroundServicePluginLogic {
 			
 			return result;
 		}
+		
+		
 
 		/*
 		 * Background Service specific methods
