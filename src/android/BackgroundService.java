@@ -176,18 +176,18 @@ public abstract class BackgroundService extends Service {
 				throw new RemoteException();
 			}
 		}
-
+		
 		@Override
 		public int getTimerMilliseconds() throws RemoteException {
 			return getMilliseconds();
 		}
-
+		
 		@Override
 		public void run() throws RemoteException {
 			runOnce();
 		}
 	};
-
+	
 	private void initialiseService() {
 		
 		if (!this.mServiceInitialised) {
