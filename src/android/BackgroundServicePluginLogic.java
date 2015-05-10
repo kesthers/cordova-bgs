@@ -239,26 +239,21 @@ public class BackgroundServicePluginLogic {
 			return result;
 		}
 		
-		public ExecuteResult deregisterForBootStart()
-		{
+		public ExecuteResult deregisterForBootStart() {
 			ExecuteResult result = null;
-		
 			try {
 				PropertyHelper.removeBootService(this.mContext, this.mServiceName);
-
 				result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG));
 			} catch (Exception ex) {
 				Log.d(LOCALTAG, "deregisterForBootStart failed", ex);
 				result = new ExecuteResult(ExecuteStatus.ERROR, createJSONResult(false, ERROR_EXCEPTION_CODE, ex.getMessage()));
 			}
-
+			
 			return result;
 		}
 		
-		public ExecuteResult setConfiguration(JSONArray data)
-		{
+		public ExecuteResult setConfiguration(JSONArray data) {
 			ExecuteResult result = null;
-			
 			try {
 				if (this.isServiceRunning()) {
 					Object obj;
@@ -280,20 +275,15 @@ public class BackgroundServicePluginLogic {
 			
 			return result;
 		}
-
-		public ExecuteResult getStatus()
-		{
+		
+		public ExecuteResult getStatus() {
 			ExecuteResult result = null;
-			
 			result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG));
-			
 			return result;
 		}
 		
-		public ExecuteResult runOnce()
-		{
+		public ExecuteResult runOnce() {
 			ExecuteResult result = null;
-			
 			try {
 				if (this.isServiceRunning()) {
 					mApi.run();
@@ -308,26 +298,19 @@ public class BackgroundServicePluginLogic {
 			
 			return result;
 		}
-
-		public ExecuteResult registerForUpdates(IUpdateListener listener, Object[] listenerExtras)
-		{
+		
+		public ExecuteResult registerForUpdates(IUpdateListener listener, Object[] listenerExtras) {
 			ExecuteResult result = null;
 			try {
-				
-				// Check for if the listener is null
-				// If it is then it will be because the Plguin version doesn't support the method
 				if (listener == null) {
 					result = new ExecuteResult(ExecuteStatus.INVALID_ACTION, createJSONResult(false, ERROR_ACTION_NOT_SUPPORTED__IN_PLUGIN_VERSION_CODE, ERROR_ACTION_NOT_SUPPORTED__IN_PLUGIN_VERSION_MSG));
 				} else {
-					
-					// If a listener already exists, then we fist need to deregister the original
-					// Ignore any failures (likely due to the listener not being available anymore)
-					if (this.isRegisteredForUpdates()) 
+					if (this.isRegisteredForUpdates()) {
 						this.deregisterListener();
-				
+					}
+					
 					this.mListener = listener;
 					this.mListenerExtras = listenerExtras;
-
 					result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG), false);
 				}
 			} catch (Exception ex) {
