@@ -189,23 +189,18 @@ public abstract class BackgroundService extends Service {
 	};
 	
 	private void initialiseService() {
-		
 		if (!this.mServiceInitialised) {
-			Log.i(TAG, "Initialising the service");
-
-			// Initialise the LatestResult object
 			JSONObject tmp = initialiseLatestResult();
-
-			Log.i(TAG, "Syncing result");
 			this.setLatestResult(tmp);
-		
-			if (getEnabled())
+			if (getEnabled()) {
 				this.setupTimerTask();
+			}
 			
 			this.mServiceInitialised = true;
 		}
-
 	}
+	
+	
 	
 	private void cleanupService() {
 		Log.i(TAG, "Running cleanupService");
