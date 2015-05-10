@@ -558,18 +558,12 @@ public class BackgroundServicePluginLogic {
 			return result;
 		}
 	}
-
+	
 	protected class ExecuteResult {
-
-		/*
-		 ************************************************************************************************
-		 * Fields 
-		 ************************************************************************************************
-		 */
 		private ExecuteStatus mStatus;
 		private JSONObject mData;
 		private boolean mFinished = true;
-
+		
 		public ExecuteStatus getStatus() {
 			return this.mStatus;
 		}
@@ -589,16 +583,11 @@ public class BackgroundServicePluginLogic {
 		public boolean isFinished() {
 			return this.mFinished;
 		}
-
+		
 		public void setFinished(boolean pFinished) {
 			this.mFinished = pFinished;
 		}
 		
-		/*
-		 ************************************************************************************************
-		 * Constructors 
-		 ************************************************************************************************
-		 */
 		public ExecuteResult(ExecuteStatus pStatus) {
 			this.mStatus = pStatus;
 		}
@@ -607,30 +596,22 @@ public class BackgroundServicePluginLogic {
 			this.mStatus = pStatus;
 			this.mData = pData;
 		}
-
+		
 		public ExecuteResult(ExecuteStatus pStatus, JSONObject pData, boolean pFinished) {
 			this.mStatus = pStatus;
 			this.mData = pData;
 			this.mFinished = pFinished;
 		}
-
 	}
-
+	
 	public interface IUpdateListener {
 		public void handleUpdate(ExecuteResult logicResult, Object[] listenerExtras);
 		public void closeListener(ExecuteResult logicResult, Object[] listenerExtras);
 	}
 	
-	/*
-	 ************************************************************************************************
-	 * Enums 
-	 ************************************************************************************************
-	 */
 	protected enum ExecuteStatus {
 		OK,
 		ERROR,
 		INVALID_ACTION
 	}
-
-
 }
