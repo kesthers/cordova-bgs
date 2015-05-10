@@ -2,11 +2,9 @@ package com.kesthers.plugins.bgs;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
@@ -18,136 +16,69 @@ import android.util.Log;
 import android.content.ServiceConnection;
 
 public class BackgroundServicePluginLogic {
-
-	/*
-	 ************************************************************************************************
-	 * Static values 
-	 ************************************************************************************************
-	 */
 	public static final String TAG = BackgroundServicePluginLogic.class.getSimpleName();
-	
-	/*
-	 ************************************************************************************************
-	 * Keys 
-	 ************************************************************************************************
-	 */
 	public static final String ACTION_START_SERVICE = "startService";
 	public static final String ACTION_STOP_SERVICE = "stopService";
-	
 	public static final String ACTION_ENABLE_TIMER = "enableTimer";
 	public static final String ACTION_DISABLE_TIMER = "disableTimer";
-
 	public static final String ACTION_SET_CONFIGURATION = "setConfiguration";
-	
 	public static final String ACTION_REGISTER_FOR_BOOTSTART = "registerForBootStart";
 	public static final String ACTION_DEREGISTER_FOR_BOOTSTART = "deregisterForBootStart";
-	
 	public static final String ACTION_GET_STATUS = "getStatus";
-
 	public static final String ACTION_RUN_ONCE = "runOnce";
-
 	public static final String ACTION_REGISTER_FOR_UPDATES = "registerForUpdates";
 	public static final String ACTION_DEREGISTER_FOR_UPDATES = "deregisterForUpdates";
-	
-	
 	public static final int ERROR_NONE_CODE = 0;
 	public static final String ERROR_NONE_MSG = "";
-	
 	public static final int ERROR_PLUGIN_ACTION_NOT_SUPPORTED_CODE = -1;
 	public static final String ERROR_PLUGIN_ACTION_NOT_SUPPORTED_MSG = "Passed action not supported by Plugin";
-	
 	public static final int ERROR_INIT_NOT_YET_CALLED_CODE = -2;
 	public static final String ERROR_INIT_NOT_YET_CALLED_MSG = "Please call init prior any other action";
-	
 	public static final int ERROR_SERVICE_NOT_RUNNING_CODE = -3;
 	public static final String ERROR_SERVICE_NOT_RUNNING_MSG = "Sevice not currently running";
-	
 	public static final int ERROR_UNABLE_TO_BIND_TO_BACKGROUND_SERVICE_CODE = -4;
 	public static final String ERROR_UNABLE_TO_BIND_TO_BACKGROUND_SERVICE_MSG ="Plugin unable to bind to background service";
-	
 	public static final int ERROR_UNABLE_TO_RETRIEVE_LAST_RESULT_CODE = -5;
 	public static final String ERROR_UNABLE_TO_RETRIEVE_LAST_RESULT_MSG = "Unable to retrieve latest result (reason unknown)";
-	
 	public static final int ERROR_LISTENER_ALREADY_REGISTERED_CODE = -6;
 	public static final String ERROR_LISTENER_ALREADY_REGISTERED_MSG = "Listener already registered";
-	
 	public static final int ERROR_LISTENER_NOT_REGISTERED_CODE = -7;
 	public static final String ERROR_LISTENER_NOT_REGISTERED_MSG = "Listener not registered";
-
 	public static final int ERROR_UNABLE_TO_CLOSED_LISTENER_CODE = -8;
 	public static final String ERROR_UNABLE_TO_CLOSED_LISTENER_MSG = "Unable to close listener";
-	
 	public static final int ERROR_ACTION_NOT_SUPPORTED__IN_PLUGIN_VERSION_CODE = -9;
 	public static final String ERROR_ACTION_NOT_SUPPORTED__IN_PLUGIN_VERSION_MSG = "Action is not supported in this version of the plugin";
-
 	public static final int ERROR_EXCEPTION_CODE = -99;
 	
-	/*
-	 ************************************************************************************************
-	 * Fields 
-	 ************************************************************************************************
-	 */
 	private Context mContext;
 	private Hashtable<String, ServiceDetails> mServices = new Hashtable<String, ServiceDetails>();
-
-	/*
-	 ************************************************************************************************
-	 * Constructors 
-	 ************************************************************************************************
-	 */
-	// Part fix for https://github.com/Red-Folder/Cordova-Plugin-BackgroundService/issues/19
-	//public BackgroundServicePluginLogic() {
-	//}
-
+	
 	public BackgroundServicePluginLogic(Context pContext) {
 		this.mContext = pContext;
 	}
-
-	/*
-	 ************************************************************************************************
-	 * Public Methods 
-	 ************************************************************************************************
-	 */
-	
-	// Part fix for https://github.com/Red-Folder/Cordova-Plugin-BackgroundService/issues/19
-	//public void initialize(Context pContext) {
-	//	this.mContext = pContext;
-	//}
-	
-	//public boolean isInitialized() {
-	//	if (this.mContext == null)
-	//		return false;
-	//	else
-	//		return true;
-	//}
 	
 	public boolean isActionValid(String action) {
 		boolean result = false;
-
+		
 		if(ACTION_START_SERVICE.equals(action)) result = true;
 		if(ACTION_STOP_SERVICE.equals(action)) result = true;
-		
 		if(ACTION_ENABLE_TIMER.equals(action)) result = true;
 		if(ACTION_DISABLE_TIMER.equals(action)) result = true;
-
 		if(ACTION_SET_CONFIGURATION.equals(action)) result = true;
-		
 		if(ACTION_REGISTER_FOR_BOOTSTART.equals(action)) result = true;
 		if(ACTION_DEREGISTER_FOR_BOOTSTART.equals(action)) result = true;
-		
 		if(ACTION_GET_STATUS.equals(action)) result = true;
-
 		if(ACTION_RUN_ONCE.equals(action)) result = true;
-		
 		if(ACTION_REGISTER_FOR_UPDATES.equals(action)) result = true;
 		if(ACTION_DEREGISTER_FOR_UPDATES.equals(action)) result = true;
-
 		return result;
 	}
-
+	
 	public ExecuteResult execute(String action, JSONArray data) {
 		return execute(action, data, null, null);
 	}
+	
+	
 
 	public ExecuteResult execute(String action, JSONArray data, IUpdateListener listener, Object[] listenerExtras) {
 		ExecuteResult result = null;
