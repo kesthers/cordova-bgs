@@ -52,7 +52,7 @@ public abstract class BackgroundService extends Service {
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = sharedPrefs.edit();
 		editor.putInt(this.getClass().getName() + ".Milliseconds", milliseconds);
-		editor.commit(); // Very important
+		editor.commit();
 	}
 	
 	protected JSONObject getLatestResult() {
@@ -118,66 +118,50 @@ public abstract class BackgroundService extends Service {
 					Log.d(TAG, "Listener not added");
 			}
 		}
-
+		
 		@Override
-		public void removeListener(BackgroundServiceListener listener)
-				throws RemoteException {
-
+		public void removeListener(BackgroundServiceListener listener) throws RemoteException {
 			synchronized (mListeners) {
 				if (mListeners.size() > 0) {
 					boolean removed = false;
-					for (int i = 0; i < mListeners.size() && !removed; i++)
-					{
+					for (int i = 0; i < mListeners.size() && !removed; i++) {
 						if (listener.getUniqueID().equals(mListeners.get(i).getUniqueID())) {
 							mListeners.remove(i);
 							removed = true;
 						}
 					}
-					
-					if (removed)
-						Log.d(TAG, "Listener removed");
-					else 
-						Log.d(TAG, "Listener not found");
 				}
 			}
 		}
-
+		
 		@Override
 		public void enableTimer(int milliseconds) throws RemoteException {
-			// First stop it just to be on the safe side
 			stopTimerTask();
-			
-			// Then enable and set the milliseconds
 			setEnabled(true);
 			setMilliseconds(milliseconds);
-			
-			// Finally setup the TimerTask
 			setupTimerTask();
 		}
-
+		
 		@Override
 		public void disableTimer() throws RemoteException {
-			// Set to disabled
 			setEnabled(false);
-			
-			// Stop the timer task
 			stopTimerTask();
 		}
-
+		
 		@Override
 		public boolean isTimerEnabled() throws RemoteException {
 			return getEnabled();
 		}
-
+		
 		@Override
 		public String getConfiguration() throws RemoteException {
 			JSONObject array = getConfig();
 			if (array == null)
 				return "";
-			else 
+			else
 				return array.toString();
 		}
-
+		
 		@Override
 		public void setConfiguration(String configuration) throws RemoteException {
 			try {
@@ -186,91 +170,64 @@ public abstract class BackgroundService extends Service {
 					array = new JSONObject(configuration);
 				} else {
 					array = new JSONObject();
-				}	
+				}
 				setConfig(array);
 			} catch (Exception ex) {
 				throw new RemoteException();
 			}
 		}
-
+		
 		@Override
 		public int getTimerMilliseconds() throws RemoteException {
 			return getMilliseconds();
 		}
-
+		
 		@Override
 		public void run() throws RemoteException {
 			runOnce();
 		}
 	};
-
+	
 	private void initialiseService() {
-		
 		if (!this.mServiceInitialised) {
-			Log.i(TAG, "Initialising the service");
-
-			// Initialise the LatestResult object
 			JSONObject tmp = initialiseLatestResult();
-
-			Log.i(TAG, "Syncing result");
 			this.setLatestResult(tmp);
-		
+			
 			if (getEnabled())
 				this.setupTimerTask();
-			
+				
 			this.mServiceInitialised = true;
 		}
-
 	}
 	
 	private void cleanupService() {
-		Log.i(TAG, "Running cleanupService");
-		
-		Log.i(TAG, "Stopping timer task");
 		stopTimerTask();
-
-		Log.i(TAG, "Removing the timer");
 		if (this.mTimer != null) {
-			Log.i(TAG, "Timer is not null");
 			try {
-				this.mTimer.cancel();     
-				Log.i(TAG, "Timer.cancel has been called");
+				this.mTimer.cancel();
 				this.mTimer = null;
 			} catch (Exception ex) {
 				Log.i(TAG, "Exception has occurred - " + ex.getMessage());
 			}
 		}
-
 	}
-
+	
 	private void setupTimerTask () {
-		// Only create a timer if the timer is null
 		if (this.mTimer == null) {
 			this.mTimer = new Timer(this.getClass().getName());
 		}
 		
-		// Only create the updateTask if is null
 		if (this.mUpdateTask == null) {
-			this.mUpdateTask = getTimerTask(); 			
+			this.mUpdateTask = getTimerTask();
 			int milliseconds = getMilliseconds();
 			this.mTimer.schedule(this.mUpdateTask, 1000L, milliseconds);
 		}
-
+		
 		onTimerEnabled();
 	}
 	
 	private void stopTimerTask() {
-		
-		Log.i(TAG, "stopTimerTask called");
-		if (this.mUpdateTask != null)
-		{
-			Log.i(TAG, "updateTask is not null");
-			if (this.mUpdateTask.cancel() )
-			{
-				Log.i(TAG, "updateTask.cancel returned true");
-			} else {
-				Log.i(TAG, "updateTask.cancel returned false");
-			}
+		if (this.mUpdateTask != null) {
 			this.mUpdateTask = null;
 		}
 		
@@ -279,42 +236,25 @@ public abstract class BackgroundService extends Service {
 	
 	private TimerTask getTimerTask() {
 		return new TimerTask() {
-
-			@Override    
-			public void run() {       
-				Log.i(TAG, "Timer task starting work");
-
-				Log.d(TAG, "Is the service paused?");
+			@Override
+			public void run() {
 				Boolean paused = false;
 				if (mPausedUntil != null) {
-					Log.d(TAG, "Service is paused until " + (new SimpleDateFormat("dd/MM/yyyy hh:mm:ss")).format(mPausedUntil));
 					Date current = new Date();
-					Log.d(TAG, "Current is " + (new SimpleDateFormat("dd/MM/yyyy hh:mm:ss")).format(current));
 					if (mPausedUntil.after(current)) {
-						Log.d(TAG, "Service should be paused");
 						paused = true;					// Still paused
 					} else {
-						Log.d(TAG, "Service should not be paused");
-						mPausedUntil = null;				// Paused time has past so we can clear the pause
+						mPausedUntil = null;
 						onPauseComplete();
 					}
 				}
-
-				if (paused) {
-					Log.d(TAG, "Service is paused");
-				} else {
-					Log.d(TAG, "Service is not paused");
-					
-					// Runs the doWork 
-					// Sets the last result & updates the listeners
-					doWorkWrapper();
-				}
-
-				Log.i(TAG, "Timer task completing work");
-			}   
-		};
-
-	}
+				
+				doWorkWrapper();
+			}
+			
+		}
+	};
+}
 	
 	// Seperated out to allow the doWork to be called from timer and adhoc (via run method)
 	private void doWorkWrapper() {
