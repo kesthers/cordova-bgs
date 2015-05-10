@@ -1,6 +1,6 @@
-package com.kesthers.plugins.bgs;   
+package com.kesthers.plugins.bgs;
 
-interface BackgroundServiceListener {     
-	void handleUpdate(); 
-	String getUniqueID();
-} 
+interface BackgroundServiceListener {
+				void handleUpdate();
+				String getUniqueID();
+}

@@ -5,11 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
-
 import java.util.TimerTask;
-
 import org.json.JSONObject;
-
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,71 +14,47 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
 import com.kesthers.plugins.bgs.BackgroundServiceApi;
 
 public abstract class BackgroundService extends Service {
-	
-	/*
-	 ************************************************************************************************
-	 * Static values 
-	 ************************************************************************************************
-	 */
 	private static final String TAG = BackgroundService.class.getSimpleName();
-
-	/*
-	 ************************************************************************************************
-	 * Fields 
-	 ************************************************************************************************
-	 */
 	private Boolean mServiceInitialised = false;
 	private Timer mTimer;
-	
 	private final Object mResultLock = new Object();
 	private JSONObject mLatestResult = null;
-
 	private List<BackgroundServiceListener> mListeners = new ArrayList<BackgroundServiceListener>();
-	
 	private TimerTask mUpdateTask;
-	
 	private Date mPausedUntil = null;
-
+	
 	public void setPauseDuration(long pauseDuration) {
 		this.mPausedUntil = new Date(new Date().getTime() + pauseDuration);
-		
-		// Call the onPause event
 		onPause();
 	}
 	
 	public Boolean getEnabled() {
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);  
-
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		return sharedPrefs.getBoolean(this.getClass().getName() + ".Enabled", false);
 	}
-
+	
 	public void setEnabled(Boolean enabled) {
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);  
-
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = sharedPrefs.edit();
-        editor.putBoolean(this.getClass().getName() + ".Enabled", enabled);
-        editor.commit(); // Very important
+		editor.putBoolean(this.getClass().getName() + ".Enabled", enabled);
+		editor.commit();
 	}
 	
 	public int getMilliseconds() {
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);  
-
-		// Should default to a minute
-		return sharedPrefs.getInt(this.getClass().getName() + ".Milliseconds", 60000 );	
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPrefs.getInt(this.getClass().getName() + ".Milliseconds", 60000 );
 	}
-
+	
 	public void setMilliseconds(int milliseconds) {
-		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);  
-
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		SharedPreferences.Editor editor = sharedPrefs.edit();
-        editor.putInt(this.getClass().getName() + ".Milliseconds", milliseconds);
-        editor.commit(); // Very important
+		editor.putInt(this.getClass().getName() + ".Milliseconds", milliseconds);
+		editor.commit(); // Very important
 	}
-
+	
 	protected JSONObject getLatestResult() {
 		synchronized (mResultLock) {
 			return mLatestResult;
@@ -93,71 +66,39 @@ public abstract class BackgroundService extends Service {
 			this.mLatestResult = value;
 		}
 	}
-
+	
 	public void restartTimer() {
-        
-        // Stop the timertask and restart for the new interval to take effect
-        if (this.mUpdateTask != null) {
-        	this.mUpdateTask.cancel();
-        	this.mUpdateTask = null;
-
-			this.mUpdateTask = getTimerTask(); 			
+		if (this.mUpdateTask != null) {
+			this.mUpdateTask.cancel();
+			this.mUpdateTask = null;
+			this.mUpdateTask = getTimerTask();
 			this.mTimer.schedule(this.mUpdateTask, getMilliseconds(), getMilliseconds());
-        }
+		}
 	}
 	
-	/*
-	 ************************************************************************************************
-	 * Overriden Methods 
-	 ************************************************************************************************
-	 */
-
-	@Override  
+	@Override
 	public IBinder onBind(Intent intent) {
-		Log.i(TAG, "onBind called");
 		return apiEndpoint;
-	}     
+	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-	    super.onStartCommand(intent, flags, startId);
-	    Log.d(TAG, "onStartCommand run");
-
-	    initialiseService();
-	    return START_STICKY;  
+		super.onStartCommand(intent, flags, startId);
+		initialiseService();
+		return START_STICKY;
 	}
-
-	@Override  
-	public void onDestroy() {     
-		super.onDestroy();     
-		Log.i(TAG, "Service destroying");
-		
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
 		cleanupService();
 	}
 	
-	/*
-	 ************************************************************************************************
-	 * Protected methods 
-	 ************************************************************************************************
-	 */
 	protected void runOnce() {
-		// Runs the doWork once
-		// Sets the last result & updates the listeners
 		doWorkWrapper();
 	}
-
-	/*
-	 ************************************************************************************************
-	 * Private methods 
-	 ************************************************************************************************
-	 */
+	
 	private BackgroundServiceApi.Stub apiEndpoint = new BackgroundServiceApi.Stub() {
-
-		/*
-		 ************************************************************************************************
-		 * Overriden Methods 
-		 ************************************************************************************************
-		 */
 		@Override
 		public String getLatestResult() throws RemoteException {
 			synchronized (mResultLock) {
@@ -167,11 +108,9 @@ public abstract class BackgroundService extends Service {
 					return mLatestResult.toString();
 			}
 		}
-
+		
 		@Override
-		public void addListener(BackgroundServiceListener listener)
-				throws RemoteException {
-
+		public void addListener(BackgroundServiceListener listener) throws RemoteException {
 			synchronized (mListeners) {
 				if (mListeners.add(listener))
 					Log.d(TAG, "Listener added");
