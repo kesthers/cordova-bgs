@@ -477,31 +477,24 @@ public class BackgroundServicePluginLogic {
 			return result;
 		}
 		
-		
-		
-		private boolean isServiceRunning()
-		{
+		private boolean isServiceRunning() {
 			boolean result = false;
-			
 			try {
-				// Return Plugin with ServiceRunning true/ false
-				ActivityManager manager = (ActivityManager)this.mContext.getSystemService(Context.ACTIVITY_SERVICE); 
-				for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) { 
-					if (this.mServiceName.equals(service.service.getClassName())) { 
-						result = true; 
-					} 
-				} 
+				ActivityManager manager = (ActivityManager)this.mContext.getSystemService(Context.ACTIVITY_SERVICE);
+				for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+					if (this.mServiceName.equals(service.service.getClassName())) {
+						result = true;
+					}
+				}
 			} catch (Exception ex) {
 				Log.d(LOCALTAG, "isServiceRunning failed", ex);
 			}
-
-		    return result;
-		}
-
-		private Boolean isTimerEnabled()
-		{
-			Boolean result = false;
 			
+			return result;
+		}
+		
+		private Boolean isTimerEnabled() {
+			Boolean result = false;
 			try {
 				result = mApi.isTimerEnabled();
 			} catch (Exception ex) {
@@ -510,32 +503,28 @@ public class BackgroundServicePluginLogic {
 			
 			return result;
 		}
-
-		private Boolean isRegisteredForBootStart()
-		{
-			Boolean result = false;
 		
+		private Boolean isRegisteredForBootStart() {
+			Boolean result = false;
 			try {
 				result = PropertyHelper.isBootService(this.mContext, this.mServiceName);
 			} catch (Exception ex) {
 				Log.d(LOCALTAG, "isRegisteredForBootStart failed", ex);
 			}
-
+			
 			return result;
 		}
-
-		private Boolean isRegisteredForUpdates()
-		{
-			if (this.mListener == null)
+		
+		private Boolean isRegisteredForUpdates() {
+			if (this.mListener == null) {
 				return false;
-			else
+			} else {
 				return true;
+			}
 		}
-
-		private JSONObject getConfiguration()
-		{
+		
+		private JSONObject getConfiguration() {
 			JSONObject result = null;
-			
 			try {
 				String data = mApi.getConfiguration();
 				result = new JSONObject(data);
@@ -545,25 +534,21 @@ public class BackgroundServicePluginLogic {
 			
 			return result;
 		}
-
-		private JSONObject getLatestResult()
-		{
+		
+		private JSONObject getLatestResult() {
 			JSONObject result = null;
-
 			try {
 				String data = mApi.getLatestResult();
 				result = new JSONObject(data);
 			} catch (Exception ex) {
 				Log.d(LOCALTAG, "getLatestResult failed", ex);
 			}
-
+			
 			return result;
 		}
-
-		private int getTimerMilliseconds()
-		{
+		
+		private int getTimerMilliseconds() {
 			int result = -1;
-			
 			try {
 				result = mApi.getTimerMilliseconds();
 			} catch (Exception ex) {
@@ -572,7 +557,6 @@ public class BackgroundServicePluginLogic {
 			
 			return result;
 		}
-
 	}
 
 	protected class ExecuteResult {
