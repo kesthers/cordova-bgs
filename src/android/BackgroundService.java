@@ -94,52 +94,30 @@ public abstract class BackgroundService extends Service {
 		cleanupService();
 	}
 	
-	
-	
-	/*
-	 ************************************************************************************************
-	 * Protected methods 
-	 ************************************************************************************************
-	 */
 	protected void runOnce() {
-		// Runs the doWork once
-		// Sets the last result & updates the listeners
 		doWorkWrapper();
 	}
-
-	/*
-	 ************************************************************************************************
-	 * Private methods 
-	 ************************************************************************************************
-	 */
+	
 	private BackgroundServiceApi.Stub apiEndpoint = new BackgroundServiceApi.Stub() {
-
-		/*
-		 ************************************************************************************************
-		 * Overriden Methods 
-		 ************************************************************************************************
-		 */
 		@Override
 		public String getLatestResult() throws RemoteException {
 			synchronized (mResultLock) {
-				if (mLatestResult == null)
+				if (mLatestResult == null) {
 					return "{}";
-				else
+				} else {
 					return mLatestResult.toString();
+				}
 			}
 		}
-
+		
 		@Override
-		public void addListener(BackgroundServiceListener listener)
-				throws RemoteException {
-
+		public void addListener(BackgroundServiceListener listener) throws RemoteException {
 			synchronized (mListeners) {
-				if (mListeners.add(listener))
-					Log.d(TAG, "Listener added");
-				else
-					Log.d(TAG, "Listener not added");
+				
 			}
 		}
+		
+		
 
 		@Override
 		public void removeListener(BackgroundServiceListener listener)
