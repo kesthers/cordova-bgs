@@ -200,61 +200,41 @@ public abstract class BackgroundService extends Service {
 		}
 	}
 	
-	
-	
 	private void cleanupService() {
-		Log.i(TAG, "Running cleanupService");
-		
-		Log.i(TAG, "Stopping timer task");
 		stopTimerTask();
-
-		Log.i(TAG, "Removing the timer");
 		if (this.mTimer != null) {
-			Log.i(TAG, "Timer is not null");
 			try {
-				this.mTimer.cancel();     
-				Log.i(TAG, "Timer.cancel has been called");
+				this.mTimer.cancel();
 				this.mTimer = null;
 			} catch (Exception ex) {
 				Log.i(TAG, "Exception has occurred - " + ex.getMessage());
 			}
 		}
-
 	}
-
+	
 	private void setupTimerTask () {
-		// Only create a timer if the timer is null
 		if (this.mTimer == null) {
 			this.mTimer = new Timer(this.getClass().getName());
 		}
 		
-		// Only create the updateTask if is null
 		if (this.mUpdateTask == null) {
-			this.mUpdateTask = getTimerTask(); 			
+			this.mUpdateTask = getTimerTask();
 			int milliseconds = getMilliseconds();
 			this.mTimer.schedule(this.mUpdateTask, 1000L, milliseconds);
 		}
-
+		
 		onTimerEnabled();
 	}
 	
 	private void stopTimerTask() {
-		
-		Log.i(TAG, "stopTimerTask called");
-		if (this.mUpdateTask != null)
-		{
-			Log.i(TAG, "updateTask is not null");
-			if (this.mUpdateTask.cancel() )
-			{
-				Log.i(TAG, "updateTask.cancel returned true");
-			} else {
-				Log.i(TAG, "updateTask.cancel returned false");
-			}
+		if (this.mUpdateTask != null) {
 			this.mUpdateTask = null;
 		}
 		
 		onTimerDisabled();
 	}
+	
+	
 	
 	private TimerTask getTimerTask() {
 		return new TimerTask() {
