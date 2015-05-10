@@ -141,115 +141,55 @@ public class BackgroundServicePluginLogic {
 		
 		this.mServices = null;
 	}
-
-
-	/*
-	 ************************************************************************************************
-	 * Internal Class 
-	 ************************************************************************************************
-	 */
+	
 	protected class ServiceDetails {
-		/*
-		 ************************************************************************************************
-		 * Static values 
-		 ************************************************************************************************
-		 */
 		public final String LOCALTAG = BackgroundServicePluginLogic.ServiceDetails.class.getSimpleName();
-		
-		/*
-		 ************************************************************************************************
-		 * Fields 
-		 ************************************************************************************************
-		 */
 		private String mServiceName = "";
 		private Context mContext;
-		
 		private BackgroundServiceApi mApi;
-
 		private String mUniqueID = java.util.UUID.randomUUID().toString();
-		
 		private boolean mInitialised = false;
-		
 		private Intent mService = null;
-		
 		private Object mServiceConnectedLock = new Object();
 		private Boolean mServiceConnected = null;
-
 		private IUpdateListener mListener = null;
 		private Object[] mListenerExtras = null;
-				
-		/*
-		 ************************************************************************************************
-		 * Constructors 
-		 ************************************************************************************************
-		 */
-		public ServiceDetails(Context context, String serviceName)
-		{
+		
+		public ServiceDetails(Context context, String serviceName) {
 			this.mContext = context;
 			this.mServiceName = serviceName;
 		}
 		
-		/*
-		 ************************************************************************************************
-		 * Public Methods 
-		 ************************************************************************************************
-		 */
-		public void initialise()
-		{
+		public void initialise() {
 			this.mInitialised = true;
-			
-			// If the service is running, then automatically bind to it
 			if (this.isServiceRunning()) {
 				startService();
 			}
 		}
 		
-		public boolean isInitialised()
-		{
+		public boolean isInitialised() {
 			return mInitialised;
 		}
-
-		public ExecuteResult startService()
-		{
-			Log.d(LOCALTAG, "Starting startService");
+		
+		public ExecuteResult startService() {
 			ExecuteResult result = null;
-			
 			try {
-				Log.d(LOCALTAG, "Attempting to bind to Service");
 				if (this.bindToService()) {
-					Log.d(LOCALTAG, "Bind worked");
 					result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG));
 				} else {
-					Log.d(LOCALTAG, "Bind Failed");
 					result = new ExecuteResult(ExecuteStatus.ERROR, createJSONResult(false, ERROR_UNABLE_TO_BIND_TO_BACKGROUND_SERVICE_CODE, ERROR_UNABLE_TO_BIND_TO_BACKGROUND_SERVICE_MSG));
 				}
 			} catch (Exception ex) {
-				Log.d(LOCALTAG, "startService failed", ex);
 				result = new ExecuteResult(ExecuteStatus.ERROR, createJSONResult(false, ERROR_EXCEPTION_CODE, ex.getMessage()));
 			}
 			
-			Log.d(LOCALTAG, "Finished startService");
 			return result;
 		}
 		
-		public ExecuteResult stopService()
-		{
+		public ExecuteResult stopService() {
 			ExecuteResult result = null;
-			
-			Log.d("ServiceDetails", "stopService called");
-
 			try {
-				
-				Log.d("ServiceDetails", "Unbinding Service");
 				this.mContext.unbindService(serviceConnection);
-				
-				Log.d("ServiceDetails", "Stopping service");
-				if (this.mContext.stopService(this.mService))
-				{
-					Log.d("ServiceDetails", "Service stopped");
-				} else {
-					Log.d("ServiceDetails", "Service not stopped");
-				}
 				result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG));
 			} catch (Exception ex) {
 				Log.d(LOCALTAG, "stopService failed", ex);
@@ -259,10 +199,8 @@ public class BackgroundServicePluginLogic {
 			return result;
 		}
 		
-		public ExecuteResult enableTimer(JSONArray data)
-		{
+		public ExecuteResult enableTimer(JSONArray data) {
 			ExecuteResult result = null;
-
 			int milliseconds = data.optInt(1, 60000);
 			try {
 				mApi.enableTimer(milliseconds);
@@ -271,14 +209,12 @@ public class BackgroundServicePluginLogic {
 				Log.d(LOCALTAG, "enableTimer failed", ex);
 				result = new ExecuteResult(ExecuteStatus.ERROR, createJSONResult(false, ERROR_EXCEPTION_CODE, ex.getMessage()));
 			}
-
+			
 			return result;
 		}
-
-		public ExecuteResult disableTimer()
-		{
-			ExecuteResult result = null;
 		
+		public ExecuteResult disableTimer() {
+			ExecuteResult result = null;
 			try {
 				mApi.disableTimer();
 				result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG));
@@ -286,23 +222,20 @@ public class BackgroundServicePluginLogic {
 				Log.d(LOCALTAG, "disableTimer failed", ex);
 				result = new ExecuteResult(ExecuteStatus.ERROR, createJSONResult(false, ERROR_EXCEPTION_CODE, ex.getMessage()));
 			}
-
+			
 			return result;
 		}
-
-		public ExecuteResult registerForBootStart()
-		{
-			ExecuteResult result = null;
 		
+		public ExecuteResult registerForBootStart() {
+			ExecuteResult result = null;
 			try {
 				PropertyHelper.addBootService(this.mContext, this.mServiceName);
-
 				result = new ExecuteResult(ExecuteStatus.OK, createJSONResult(true, ERROR_NONE_CODE, ERROR_NONE_MSG));
 			} catch (Exception ex) {
 				Log.d(LOCALTAG, "registerForBootStart failed", ex);
 				result = new ExecuteResult(ExecuteStatus.ERROR, createJSONResult(false, ERROR_EXCEPTION_CODE, ex.getMessage()));
 			}
-
+			
 			return result;
 		}
 		
