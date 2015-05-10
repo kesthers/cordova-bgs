@@ -76,34 +76,25 @@ public abstract class BackgroundService extends Service {
 		}
 	}
 	
-	/*
-	 ************************************************************************************************
-	 * Overriden Methods 
-	 ************************************************************************************************
-	 */
-
-	@Override  
+	@Override
 	public IBinder onBind(Intent intent) {
-		Log.i(TAG, "onBind called");
 		return apiEndpoint;
-	}     
+	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-	    super.onStartCommand(intent, flags, startId);
-	    Log.d(TAG, "onStartCommand run");
-
-	    initialiseService();
-	    return START_STICKY;  
+		super.onStartCommand(intent, flags, startId);
+		initialiseService();
+		return START_STICKY;
 	}
-
-	@Override  
-	public void onDestroy() {     
-		super.onDestroy();     
-		Log.i(TAG, "Service destroying");
-		
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
 		cleanupService();
 	}
+	
+	
 	
 	/*
 	 ************************************************************************************************
