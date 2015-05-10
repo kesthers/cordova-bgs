@@ -234,45 +234,26 @@ public abstract class BackgroundService extends Service {
 		onTimerDisabled();
 	}
 	
-	
-	
 	private TimerTask getTimerTask() {
 		return new TimerTask() {
-
-			@Override    
-			public void run() {       
-				Log.i(TAG, "Timer task starting work");
-
-				Log.d(TAG, "Is the service paused?");
+			@Override
+			public void run() {
 				Boolean paused = false;
 				if (mPausedUntil != null) {
-					Log.d(TAG, "Service is paused until " + (new SimpleDateFormat("dd/MM/yyyy hh:mm:ss")).format(mPausedUntil));
 					Date current = new Date();
-					Log.d(TAG, "Current is " + (new SimpleDateFormat("dd/MM/yyyy hh:mm:ss")).format(current));
 					if (mPausedUntil.after(current)) {
-						Log.d(TAG, "Service should be paused");
-						paused = true;					// Still paused
+						paused = true;
 					} else {
-						Log.d(TAG, "Service should not be paused");
-						mPausedUntil = null;				// Paused time has past so we can clear the pause
+						mPausedUntil = null;
 						onPauseComplete();
 					}
 				}
-
-				if (paused) {
-					Log.d(TAG, "Service is paused");
-				} else {
-					Log.d(TAG, "Service is not paused");
-					
-					// Runs the doWork 
-					// Sets the last result & updates the listeners
+				
+				if (!paused) {
 					doWorkWrapper();
 				}
-
-				Log.i(TAG, "Timer task completing work");
-			}   
+			}
 		};
-
 	}
 	
 	// Seperated out to allow the doWork to be called from timer and adhoc (via run method)
