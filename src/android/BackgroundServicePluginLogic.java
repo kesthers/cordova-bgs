@@ -78,74 +78,41 @@ public class BackgroundServicePluginLogic {
 		return execute(action, data, null, null);
 	}
 	
-	
-
 	public ExecuteResult execute(String action, JSONArray data, IUpdateListener listener, Object[] listenerExtras) {
 		ExecuteResult result = null;
 		
-		Log.d(TAG, "Start of Execute");
 		try {
-			Log.d(TAG, "Withing try block");
-			if ((data != null) &&
-					(!data.isNull(0)) &&
-					(data.get(0) instanceof String) &&
-					(data.getString(0).length() > 0)) {
-
+			if ((data != null) && (!data.isNull(0)) && (data.get(0) instanceof String) && (data.getString(0).length() > 0)) {
 				String serviceName = data.getString(0);
-				
-				Log.d(TAG, "Finding servicename " + serviceName);
-				
 				ServiceDetails service = null;
-
-				Log.d(TAG, "Services contain " + this.mServices.size() + " records");
 				
 				if (this.mServices.containsKey(serviceName)) {
-					Log.d(TAG, "Found existing Service Details");
 					service = this.mServices.get(serviceName);
 				} else {
-					Log.d(TAG, "Creating new Service Details");
 					service = new ServiceDetails(this.mContext, serviceName);
 					this.mServices.put(serviceName, service);
 				}
-
-				Log.d(TAG, "Action = " + action);
-
-
-				if (!service.isInitialised())
-					service.initialise();
-
-				if (ACTION_GET_STATUS.equals(action)) result = service.getStatus();
 				
+				if (!service.isInitialised()) service.initialise();
+				if (ACTION_GET_STATUS.equals(action)) result = service.getStatus();
 				if (ACTION_START_SERVICE.equals(action)) result = service.startService();
-
 				if (ACTION_REGISTER_FOR_BOOTSTART.equals(action)) result = service.registerForBootStart();
 				if (ACTION_DEREGISTER_FOR_BOOTSTART.equals(action)) result = service.deregisterForBootStart();
-
 				if (ACTION_REGISTER_FOR_UPDATES.equals(action)) result = service.registerForUpdates(listener, listenerExtras);
 				if (ACTION_DEREGISTER_FOR_UPDATES.equals(action)) result = service.deregisterForUpdates();
-
 				if (result == null) {
-					Log.d(TAG, "Check if the service is running?");
-
 					if (service != null && service.isServiceRunning()) {
-						Log.d(TAG, "Service is running?");
-						
 						if (ACTION_STOP_SERVICE.equals(action)) result = service.stopService();
-
 						if (ACTION_ENABLE_TIMER.equals(action)) result = service.enableTimer(data);
 						if (ACTION_DISABLE_TIMER.equals(action)) result = service.disableTimer();
-
 						if (ACTION_SET_CONFIGURATION.equals(action)) result = service.setConfiguration(data);
-
 						if (ACTION_RUN_ONCE.equals(action)) result = service.runOnce();
-
 					} else {
 						result = new ExecuteResult(ExecuteStatus.INVALID_ACTION);
 					}
 				}
-
-				if (result == null)
-					result = new ExecuteResult(ExecuteStatus.INVALID_ACTION);
+				
+				if (result == null) result = new ExecuteResult(ExecuteStatus.INVALID_ACTION);
 			} else {
 				result = new ExecuteResult(ExecuteStatus.ERROR);
 				Log.d(TAG, "ERROR - no servicename");
@@ -154,39 +121,25 @@ public class BackgroundServicePluginLogic {
 			result = new ExecuteResult(ExecuteStatus.ERROR);
 			Log.d(TAG, "Exception - " + ex.getMessage());
 		}
-
+		
 		return result;
 	}
-
+	
 	public void onDestroy() {
-		
-		Log.d(TAG, "On Destroy Start");
 		try {
-			Log.d(TAG, "Checking for services");
-			if (this.mServices != null && 
-				this.mServices.size() > 0 ) {
-
-				Log.d(TAG, "Found services");
-
+			if (this.mServices != null && this.mServices.size() > 0 ) {
 				Enumeration<String> keys = this.mServices.keys();
-				
 				while( keys.hasMoreElements() ) {
-					String key = keys.nextElement();  
+					String key = keys.nextElement();
 					ServiceDetails service = this.mServices.get(key);
-					Log.d(TAG, "Calling service.close()");
 					service.close();
 				}
 			}
 		} catch (Throwable t) {
-			// catch any issues, typical for destroy routines
-			// even if we failed to destroy something, we need to continue destroying
 			Log.d(TAG, "Error has occurred while trying to close services", t);
 		}
 		
-		
 		this.mServices = null;
-		Log.d(TAG, "On Destroy Finish");
-		
 	}
 
 
