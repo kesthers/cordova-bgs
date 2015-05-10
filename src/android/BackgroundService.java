@@ -117,67 +117,50 @@ public abstract class BackgroundService extends Service {
 			}
 		}
 		
-		
-
 		@Override
-		public void removeListener(BackgroundServiceListener listener)
-				throws RemoteException {
-
+		public void removeListener(BackgroundServiceListener listener) throws RemoteException {
 			synchronized (mListeners) {
 				if (mListeners.size() > 0) {
 					boolean removed = false;
-					for (int i = 0; i < mListeners.size() && !removed; i++)
-					{
+					for (int i = 0; i < mListeners.size() && !removed; i++) {
 						if (listener.getUniqueID().equals(mListeners.get(i).getUniqueID())) {
 							mListeners.remove(i);
 							removed = true;
 						}
 					}
-					
-					if (removed)
-						Log.d(TAG, "Listener removed");
-					else 
-						Log.d(TAG, "Listener not found");
 				}
 			}
 		}
-
+		
 		@Override
 		public void enableTimer(int milliseconds) throws RemoteException {
-			// First stop it just to be on the safe side
 			stopTimerTask();
-			
-			// Then enable and set the milliseconds
 			setEnabled(true);
 			setMilliseconds(milliseconds);
-			
-			// Finally setup the TimerTask
 			setupTimerTask();
 		}
-
+		
 		@Override
 		public void disableTimer() throws RemoteException {
-			// Set to disabled
 			setEnabled(false);
-			
-			// Stop the timer task
 			stopTimerTask();
 		}
-
+		
 		@Override
 		public boolean isTimerEnabled() throws RemoteException {
 			return getEnabled();
 		}
-
+		
 		@Override
 		public String getConfiguration() throws RemoteException {
 			JSONObject array = getConfig();
-			if (array == null)
+			if (array == null) {
 				return "";
-			else 
+			} else {
 				return array.toString();
+			}
 		}
-
+		
 		@Override
 		public void setConfiguration(String configuration) throws RemoteException {
 			try {
@@ -186,7 +169,8 @@ public abstract class BackgroundService extends Service {
 					array = new JSONObject(configuration);
 				} else {
 					array = new JSONObject();
-				}	
+				}
+				
 				setConfig(array);
 			} catch (Exception ex) {
 				throw new RemoteException();
