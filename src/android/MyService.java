@@ -14,7 +14,6 @@ public class MyService extends BackgroundService {
 	@Override
 	protected JSONObject doWork() {
 		JSONObject result = new JSONObject();
-		
 		try {
 			SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 			String now = df.format(new Date(System.currentTimeMillis()));
@@ -22,6 +21,7 @@ public class MyService extends BackgroundService {
 			result.put("Message", msg);
 			Log.d(TAG, msg);
 		} catch (JSONException e) {
+			
 		}
 		
 		return result;
@@ -30,7 +30,6 @@ public class MyService extends BackgroundService {
 	@Override
 	protected JSONObject getConfig() {
 		JSONObject result = new JSONObject();
-		
 		try {
 			result.put("HelloTo", this.mHelloTo);
 		} catch (JSONException e) {
@@ -43,8 +42,9 @@ public class MyService extends BackgroundService {
 	@Override
 	protected void setConfig(JSONObject config) {
 		try {
-			if (config.has("HelloTo"))
+			if (config.has("HelloTo")) {
 				this.mHelloTo = config.getString("HelloTo");
+			}
 		} catch (JSONException e) {
 			
 		}
@@ -57,11 +57,11 @@ public class MyService extends BackgroundService {
 	
 	@Override
 	protected void onTimerEnabled() {
-		// TODO Auto-generated method stub
+		
 	}
 	
 	@Override
 	protected void onTimerDisabled() {
-		// TODO Auto-generated method stub
+		
 	}
 }
